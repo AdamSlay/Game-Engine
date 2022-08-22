@@ -73,6 +73,21 @@ int main()
     }
 
 
+    // Second Story
+    int LL_sec = 160;
+    int LR_sec = 260;
+    int T_sec = 250;
+    SDL_RenderDrawLine(renderer, LL_sec, T_wall, LL_sec, T_sec);
+    SDL_RenderDrawLine(renderer, LL_sec, T_sec, LR_sec, T_sec);
+    SDL_RenderDrawLine(renderer, LR_sec, T_wall, LR_sec, T_sec);
+    int RL_sec = 370;
+    int RR_sec = 470;
+    SDL_RenderDrawLine(renderer, RL_sec, T_sec, RR_sec, T_sec);
+    SDL_RenderDrawLine(renderer, RL_sec, T_wall, RL_sec, T_sec);
+    SDL_RenderDrawLine(renderer, RR_sec, T_wall, RR_sec, T_sec);
+    SDL_RenderDrawLine(renderer, RL_sec, T_sec+20, LR_sec, T_sec+20);
+
+
     SDL_RenderPresent(renderer);
     SDL_Delay(3000);
 
