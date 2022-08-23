@@ -87,9 +87,23 @@ int main()
     SDL_RenderDrawLine(renderer, RR_sec, T_wall, RR_sec, T_sec);
     SDL_RenderDrawLine(renderer, RL_sec, T_sec+20, LR_sec, T_sec+20);
 
+    // Third Story
+    SDL_RenderDrawLine(renderer, 210, T_sec, 210, 200);    
+    SDL_RenderDrawLine(renderer, 210, 200, 420, 200);    
+    SDL_RenderDrawLine(renderer, 420, T_sec, 420, 200);
+    
+    // Tower
+    SDL_RenderDrawLine(renderer, 290, 200, 290, 100);
+    SDL_RenderDrawLine(renderer, 340, 200, 340, 100);
+    
+    // Roof Triangle
+    SDL_RenderDrawLine(renderer, 290, 100, 280, 100);
+    SDL_RenderDrawLine(renderer, 340, 100, 350, 100);
+    SDL_RenderDrawLine(renderer, 280, 100, 316, 50);
+    SDL_RenderDrawLine(renderer, 350, 100, 316, 50);
 
     SDL_RenderPresent(renderer);
-    SDL_Delay(3000);
+    SDL_Delay(13000);
 
     return 0;
 }
