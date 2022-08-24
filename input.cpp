@@ -1,4 +1,5 @@
 // Using SDL to take user input
+#include <map>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_keyboard.h>
@@ -68,6 +69,7 @@ int main()
     int gravity = 7;
     SDL_Rect rect{sq, sq, 30, 30};
     SDL_Rect plat{0,800,640,40};
+    SDL_Rect plat2{730,1200,640,40};
     
     // Control
     bool running = true;
@@ -76,15 +78,24 @@ int main()
     const Uint8 *keystate;
     bool Grounded = true;
     
+
+    // Plats
     while (running)
     { 
         // Gravitational Force
         plat.y -= 2;
-        bool touching = check_collision(rect, plat);
-        if (touching)
+        plat2.y -= 2;
+        bool touching1 = check_collision(rect, plat);
+        bool touching2 = check_collision(rect, plat2);
+        if (touching1)
         {
             Grounded = true;
             rect.y = plat.y - 30;
+        }
+        if (touching2)
+        {
+            Grounded = true;
+            rect.y = plat2.y - 30;
         }
         else
         {   
@@ -92,6 +103,17 @@ int main()
             rect.y += gravity; 
         }
         
+        // Plats
+        if (plat.y < 0)
+        {
+            plat.y = 900;
+        }
+        if (plat2.y < 0)
+        {
+            plat2.y = 900;
+        }
+
+
         // User Input Events
         while(SDL_PollEvent(&event))
         {
@@ -133,6 +155,7 @@ int main()
         SDL_SetRenderDrawColor(renderer, 158, 136, 25, 255);
         SDL_RenderFillRect(renderer, &rect);
         SDL_RenderFillRect(renderer, &plat);
+        SDL_RenderFillRect(renderer, &plat2);
         SDL_RenderPresent(renderer);
         SDL_Delay(10);
     }
