@@ -1,15 +1,8 @@
 // Pip Boy style terminal
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_keyboard.h>
-#include <SDL2/SDL_keycode.h>
-#include <SDL2/SDL_rect.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_ttf.h>
 #include <iostream>
-
 
 int main()
 {
@@ -57,7 +50,7 @@ int main()
             {
                 inp += event.text.text;
             }
-            if(inp.size() > 79 and inp.size() < 81)
+            if(inp.size() > 79)
             {
                //TODO: Wrap New Lines 
             }
@@ -77,10 +70,16 @@ int main()
                         }
                         break;
                     case SDLK_RETURN:
-                        //TODO: Figure  out how to keep old text and start new text box.
+                        //TODO: keep old text and start new text box underneath
                         inpY += 25;
                         break;
                 }
+            }
+
+            // Exit
+            else if (event.type == SDL_QUIT)
+            {
+                running = false;
             }
         }
 
