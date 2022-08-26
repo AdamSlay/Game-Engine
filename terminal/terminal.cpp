@@ -8,19 +8,25 @@
 
 
 // Vars
-SDL_Window *window = nullptr;
-SDL_Renderer *renderer = nullptr;
-SDL_Event event;
-SDL_Rect rect{20,50, 980,27};
 bool running = true;
 int titleW = 0;
 int titleH = 0;
+int promptW = 0;
+int promptH = 0;
 int inpW = 0;
 int inpH = 0;
 int inpY = 100; 
 int bs_allowed = 0;
-std::string inp("-> "); 
+int new_lines = 0;
+std::string prompt("-> ");
+std::string inp(""); 
 std::string title("Welcome to TerminAItor v0.0.1");
+SDL_Window *window = nullptr;
+SDL_Renderer *renderer = nullptr;
+SDL_Event event;
+SDL_Rect title_rect{20,50, 900,27};
+SDL_Rect prompt_rect{20, inpY, promptW, promptH};
+SDL_Rect input_rect{50, inpY, inpW, inpH};
 SDL_Color bg{23,26,17};
 SDL_Color tx{241,201,8};
 
@@ -40,20 +46,27 @@ int main()
     SDL_FreeSurface(font_surf);
 
     SDL_QueryTexture(font_texture, NULL, NULL, &titleW, &titleH);
-    SDL_Rect font_rect{rect.x + 10, rect.y - 1, titleW, titleH}; 
+    SDL_Rect font_rect{title_rect.x + 10, title_rect.y - 1, titleW, titleH}; 
    
     while(running)
     {
         // Setup User Input and Display to Screen
+        SDL_Surface *prompt_surf = TTF_RenderText_Blended_Wrapped(font, prompt.c_str(), tx, 0);
+        SDL_Texture *prompt_texture = SDL_CreateTextureFromSurface(renderer, prompt_surf);
+        SDL_QueryTexture(prompt_texture, NULL, NULL, &promptW, &promptH);
         SDL_Surface *input_surf = TTF_RenderText_Blended_Wrapped(font, inp.c_str(), tx, 0);
         SDL_Texture *input_texture = SDL_CreateTextureFromSurface(renderer, input_surf);
         SDL_QueryTexture(input_texture, NULL, NULL, &inpW, &inpH);
-        SDL_Rect input_rect{20,inpY, inpW, inpH};
-    
+        prompt_rect.y = inpY;
+        prompt_rect.h = promptH;
+        prompt_rect.w = promptW;
+        input_rect.y = inpY;
+        input_rect.h = inpH;
+        input_rect.w = inpW;
+        
         // User Iput
         while(SDL_PollEvent(&event))
         {
-            
             // Text Input
             if(event.type == SDL_TEXTINPUT)
             {
@@ -63,18 +76,20 @@ int main()
                 // Wrap Text after 80 chars
                 if (bs_allowed % 80 == 0 and bs_allowed > 1)
                 {  
-                    bs_allowed = 0;
                     if (inp.substr(inp.size() - 1) == " ")
                     {
-                        inp += "\n   ";
+                        inp += "\n";
+                        new_lines += 1;
+                        bs_allowed += 2;
                     }
                     else
                     {
-                        inp += "-\n   ";
+                        inp += "-\n";
+                        new_lines += 1;
+                        bs_allowed += 2;
                     }
                 }
             }
-            
             // Escape, Backspace, Enter
             if(event.type == SDL_KEYDOWN)
             {
@@ -87,36 +102,51 @@ int main()
                         if (bs_allowed > 0)
                         {
                             inp.pop_back();
+                            bs_allowed -= 1;
+                            // if backspace traverses over new_line,
+                            // subtract one new line from the prompt queue
+                            if (bs_allowed % 80 == 0 and bs_allowed > 1)
+                            {
+                                new_lines -= 1;
+                            }
                         }
-                        bs_allowed -= 1;
-                        SDL_Delay(5);
                         break;
                     case SDLK_RETURN:
-                        //TODO: keep old text and start new text on new line
-                        inp += "\n-> "; 
+                        // Keep track of how many new lines are in the 
+                        // current input string and move prompt to the
+                        // correct line. Also, adjust the number of 
+                        // backspaces available.
+                        inp += "\n";
+                        for (int i = 0; i < new_lines; i++)
+                        {
+                            prompt += "\n";
+                        }
+                        prompt += "\n-> ";
                         bs_allowed = 0;
+                        new_lines = 0;
                         break;
                 }
             }
-
             // Exit
             else if (event.type == SDL_QUIT)
             {
                 running = false;
             }
         }
-        
         // Draw to Screen
         SDL_SetRenderDrawColor(renderer, 23, 26, 17, 255);
         SDL_RenderClear(renderer);
         SDL_SetRenderDrawColor(renderer, 241, 201, 8, 255);
-        SDL_RenderFillRect(renderer, &rect);
+        SDL_RenderFillRect(renderer, &title_rect);
         SDL_RenderCopy(renderer, font_texture, NULL, &font_rect);
         SDL_RenderCopy(renderer, input_texture, NULL, &input_rect);
-        
+        SDL_RenderCopy(renderer, prompt_texture, NULL, &prompt_rect);
         SDL_RenderPresent(renderer);
+        // Release Resources
         SDL_FreeSurface(input_surf);
         SDL_DestroyTexture(input_texture);
+        SDL_FreeSurface(prompt_surf);
+        SDL_DestroyTexture(prompt_texture);
     }
 
     // Release Resources
