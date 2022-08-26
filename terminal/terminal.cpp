@@ -1,7 +1,5 @@
 // Pip Boy style terminal
 
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_surface.h>
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -13,22 +11,23 @@ int titleW = 0;
 int titleH = 0;
 int promptW = 0;
 int promptH = 0;
+int promptY = 100; 
 int inpW = 0;
 int inpH = 0;
-int inpY = 100; 
 int bs_allowed = 0;
 int new_lines = 0;
 std::string prompt("-> ");
 std::string inp(""); 
-std::string title("Welcome to TerminAItor v0.0.1");
+std::string title("Welcome to Typer v0.0.1");
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
 SDL_Event event;
 SDL_Rect title_rect{20,50, 900,27};
-SDL_Rect prompt_rect{20, inpY, promptW, promptH};
-SDL_Rect input_rect{50, inpY, inpW, inpH};
+SDL_Rect prompt_rect{20,promptY, promptW,promptH};
+SDL_Rect input_rect{50,promptY, inpW,inpH};
 SDL_Color bg{23,26,17};
 SDL_Color tx{241,201,8};
+//TODO: History Vector for strings and Rect
 
 int main()
 {
@@ -57,10 +56,11 @@ int main()
         SDL_Surface *input_surf = TTF_RenderText_Blended_Wrapped(font, inp.c_str(), tx, 0);
         SDL_Texture *input_texture = SDL_CreateTextureFromSurface(renderer, input_surf);
         SDL_QueryTexture(input_texture, NULL, NULL, &inpW, &inpH);
-        prompt_rect.y = inpY;
+        //TODO: Histry Surf and Texture
+        prompt_rect.y = promptY;
         prompt_rect.h = promptH;
         prompt_rect.w = promptW;
-        input_rect.y = inpY;
+        input_rect.y = promptY;
         input_rect.h = inpH;
         input_rect.w = inpW;
         
@@ -112,10 +112,9 @@ int main()
                         }
                         break;
                     case SDLK_RETURN:
-                        // Keep track of how many new lines are in the 
-                        // current input string and move prompt to the
-                        // correct line. Also, adjust the number of 
-                        // backspaces available.
+                        // Move prompt to the correct line
+                        // Reset available backspaces
+                        // TODO: append inp to history and start new inp
                         inp += "\n";
                         for (int i = 0; i < new_lines; i++)
                         {
@@ -125,6 +124,8 @@ int main()
                         bs_allowed = 0;
                         new_lines = 0;
                         break;
+                    //TODO: case SDLK_UP -> go back in history
+                    //TODO: case SDLK_DOWN -> go forward in history
                 }
             }
             // Exit
@@ -149,7 +150,7 @@ int main()
         SDL_DestroyTexture(prompt_texture);
     }
 
-    // Release Resources
+    // Close All
     SDL_StopTextInput();
     SDL_DestroyTexture(font_texture);
     TTF_CloseFont(font);
