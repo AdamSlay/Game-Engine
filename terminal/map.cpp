@@ -1,14 +1,31 @@
 // Pip Boy style terminal
 
+#include <SDL2/SDL_pixels.h>
+#include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
-#include <iostream>
+
+
+// Vars
+SDL_Window *window = nullptr;
+SDL_Renderer *renderer = nullptr;
+SDL_Event event;
+SDL_Rect rect{20,50, 980,27};
+bool running = true;
+int titleW = 0;
+int titleH = 0;
+int inpW = 0;
+int inpH = 0;
+int inpY = 100; 
+int bs_allowed = 0;
+std::string inp("-> "); 
+std::string title("Welcome to TerminAItor v0.0.1");
+SDL_Color bg{23,26,17};
+SDL_Color tx{241,201,8};
 
 int main()
 {
     // Initializations    
-    SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
     SDL_Init(SDL_INIT_EVERYTHING);
     TTF_Init();
     SDL_CreateWindowAndRenderer(1280, 800, 0, &window, &renderer);
@@ -17,27 +34,17 @@ int main()
   
     // Font Setup 
     TTF_Font *font = TTF_OpenFont("VT323-Regular.ttf", 25);
-    SDL_Surface *font_surf = TTF_RenderText_Solid(font, "Welcome to the Holocron v4.7.20", {23,26,17});
+    SDL_Surface *font_surf = TTF_RenderText_Solid(font, title.c_str(), bg);
     SDL_Texture *font_texture = SDL_CreateTextureFromSurface(renderer, font_surf);
     SDL_FreeSurface(font_surf);
 
-    // Vars and Bools
-    bool running = true;
-    SDL_Event event;
-    SDL_Rect rect{20,50, 980,27};
-    int w = 0;
-    int h = 0;
-    SDL_QueryTexture(font_texture, NULL, NULL, &w, &h);
-    SDL_Rect font_rect{rect.x + 10, rect.y - 1, w, h}; 
-    std::string inp("-> "); 
-    int inpW = 0;
-    int inpH = 0;
-    int inpY = 100; 
-    
+    SDL_QueryTexture(font_texture, NULL, NULL, &titleW, &titleH);
+    SDL_Rect font_rect{rect.x + 10, rect.y - 1, titleW, titleH}; 
+   
     while(running)
     {
         // Setup User Input and Display to Screen
-        SDL_Surface *input_surf = TTF_RenderText_Solid(font, inp.c_str(), {241,201,8});
+        SDL_Surface *input_surf = TTF_RenderText_Blended_Wrapped(font, inp.c_str(), tx, 0);
         SDL_Texture *input_texture = SDL_CreateTextureFromSurface(renderer, input_surf);
         SDL_QueryTexture(input_texture, NULL, NULL, &inpW, &inpH);
         SDL_Rect input_rect{20,inpY, inpW, inpH};
@@ -49,10 +56,21 @@ int main()
             if(event.type == SDL_TEXTINPUT)
             {
                 inp += event.text.text;
-            }
-            if(inp.size() > 79)
-            {
-               //TODO: Wrap New Lines 
+                bs_allowed += 1;
+                
+                // Wrap Text after 80 chars
+                if (bs_allowed % 80 == 0 and bs_allowed > 1)
+                {  
+                    bs_allowed = 0;
+                    if (inp.substr(inp.size() - 1) == " ")
+                    {
+                        inp += "\n   ";
+                    }
+                    else
+                    {
+                        inp += "-\n   ";
+                    }
+                }
             }
             
             // Escape, Backspace, Enter
@@ -64,14 +82,17 @@ int main()
                         running = false;
                         break;
                     case SDLK_BACKSPACE:
-                        if (inp.size() > 3)
+                        if (bs_allowed > 0)
                         {
                             inp.pop_back();
                         }
+                        bs_allowed -= 1;
+                        SDL_Delay(5);
                         break;
                     case SDLK_RETURN:
-                        //TODO: keep old text and start new text box underneath
-                        inpY += 25;
+                        //TODO: keep old text and start new text on new line
+                        inp += "\n-> "; 
+                        bs_allowed = 0;
                         break;
                 }
             }
@@ -101,5 +122,4 @@ int main()
     SDL_DestroyWindow(window);
     TTF_Quit();
     SDL_Quit();
-
 }
