@@ -1,6 +1,7 @@
 // Pip Boy style terminal
 
-#include <SDL2/SDL_pixels.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_surface.h>
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -51,7 +52,8 @@ int main()
     
         // User Iput
         while(SDL_PollEvent(&event))
-        {   
+        {
+            
             // Text Input
             if(event.type == SDL_TEXTINPUT)
             {
@@ -103,7 +105,7 @@ int main()
                 running = false;
             }
         }
-
+        
         // Draw to Screen
         SDL_SetRenderDrawColor(renderer, 23, 26, 17, 255);
         SDL_RenderClear(renderer);
@@ -111,8 +113,10 @@ int main()
         SDL_RenderFillRect(renderer, &rect);
         SDL_RenderCopy(renderer, font_texture, NULL, &font_rect);
         SDL_RenderCopy(renderer, input_texture, NULL, &input_rect);
-
+        
         SDL_RenderPresent(renderer);
+        SDL_FreeSurface(input_surf);
+        SDL_DestroyTexture(input_texture);
     }
 
     // Release Resources
