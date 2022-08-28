@@ -1,15 +1,19 @@
 // Pip Boy style terminal
 
+#include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
+#include <SDL2/SDL_surface.h>
+#include <cstdlib>
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <string>
 
 
 // Vars
 bool running = true;
-int titleW = 0;
-int titleH = 0;
+int staticW = 0;
+int staticH = 0;
 int promptW = 0;
 int promptH = 0;
 int promptY = 100; 
@@ -24,13 +28,16 @@ SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
 SDL_Event event;
 SDL_Rect title_rect{50,50, 820,27};
+SDL_Rect bot_rect{50,723, 820,27};
 SDL_Rect prompt_rect{60,promptY, promptW,promptH};
 SDL_Rect input_rect{90,promptY, inpW,inpH};
-SDL_Rect side_panel{920,50, 300,700};
-SDL_Rect bot_rect{50,723, 820,27};
+SDL_Rect side_panel{920,450, 300,300};
+SDL_Rect systems_rect{950,467, 240,27};
 SDL_Color bg{23,26,17};
 SDL_Color tx{241,201,8};
 //TODO: History Vector for strings and Rect
+
+std::string system_check_text("Air Circulation   Nominal\nWater Level       Nominal \nTemperature       Nominal\n");
 
 int main()
 {
@@ -41,14 +48,33 @@ int main()
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND); 
     SDL_StartTextInput();
   
-    // Font Setup 
+    // Static Text 
     TTF_Font *font = TTF_OpenFont("VT323-Regular.ttf", 25);
     SDL_Surface *font_surf = TTF_RenderText_Solid(font, title.c_str(), bg);
     SDL_Texture *font_texture = SDL_CreateTextureFromSurface(renderer, font_surf);
     SDL_FreeSurface(font_surf);
-    SDL_QueryTexture(font_texture, NULL, NULL, &titleW, &titleH);
-    SDL_Rect font_rect{title_rect.x + 10, title_rect.y - 1, titleW, titleH}; 
-   
+    SDL_QueryTexture(font_texture, NULL, NULL, &staticW, &staticH);
+    SDL_Rect font_rect{title_rect.x + 280, title_rect.y - 1, staticW, staticH}; 
+    
+    SDL_Surface *systxt_surf = TTF_RenderText_Solid(font, "Systems Check", bg);
+    SDL_Texture *systxt_texture = SDL_CreateTextureFromSurface(renderer, systxt_surf);
+    SDL_FreeSurface(systxt_surf);
+    SDL_QueryTexture(systxt_texture, NULL, NULL, &staticW, &staticH);
+    SDL_Rect systxt_rect{systems_rect.x + 50, systems_rect.y - 1, staticW, staticH};
+
+    SDL_Surface *bottxt_surf = TTF_RenderText_Solid(font, "Type Command and Press ENTER", bg);
+    SDL_Texture *bottxt_texture = SDL_CreateTextureFromSurface(renderer, bottxt_surf);
+    SDL_FreeSurface(bottxt_surf);
+    SDL_QueryTexture(bottxt_texture, NULL, NULL, &staticW, &staticH);
+    SDL_Rect bottxt_rect{bot_rect.x + 30, bot_rect.y - 1, staticW, staticH};
+    
+    SDL_Surface *syslist_surf = TTF_RenderText_Blended_Wrapped(font, system_check_text.c_str(), tx, 0);
+    SDL_Texture *syslist_texture = SDL_CreateTextureFromSurface(renderer, syslist_surf);
+    SDL_FreeSurface(syslist_surf);
+    SDL_QueryTexture(syslist_texture, NULL, NULL, &staticW, &staticH);
+    SDL_Rect syslist_rect{side_panel.x + 25, side_panel.y + 60, staticW, staticH};
+
+
     while(running)
     {
         // Surfaces, Textures, Rects
@@ -131,12 +157,16 @@ int main()
         SDL_SetRenderDrawColor(renderer, 23, 26, 17, 255);
         SDL_RenderClear(renderer);
         SDL_SetRenderDrawColor(renderer, 241, 201, 8, 255);
-        SDL_RenderFillRect(renderer, &title_rect);
         SDL_RenderDrawRect(renderer, &side_panel);
+        SDL_RenderFillRect(renderer, &systems_rect);
+        SDL_RenderFillRect(renderer, &title_rect);
         SDL_RenderFillRect(renderer, &bot_rect);
         SDL_RenderCopy(renderer, font_texture, NULL, &font_rect);
         SDL_RenderCopy(renderer, input_texture, NULL, &input_rect);
         SDL_RenderCopy(renderer, prompt_texture, NULL, &prompt_rect);
+        SDL_RenderCopy(renderer, systxt_texture, NULL, &systxt_rect);
+        SDL_RenderCopy(renderer, bottxt_texture, NULL, &bottxt_rect);
+        SDL_RenderCopy(renderer, syslist_texture, NULL, &syslist_rect);
         SDL_RenderPresent(renderer);
         // Release Resources
         SDL_FreeSurface(input_surf);
