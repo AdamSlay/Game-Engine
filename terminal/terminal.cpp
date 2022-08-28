@@ -1,14 +1,8 @@
-// Pip Boy style terminal
+// Vintage Terminal
 
-#include <SDL2/SDL_rect.h>
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_surface.h>
-#include <cstdlib>
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
-#include <string>
-
 
 // Vars
 bool running = true;
@@ -32,12 +26,13 @@ SDL_Rect bot_rect{50,723, 820,27};
 SDL_Rect prompt_rect{60,promptY, promptW,promptH};
 SDL_Rect input_rect{90,promptY, inpW,inpH};
 SDL_Rect side_panel{920,450, 300,300};
-SDL_Rect systems_rect{950,467, 240,27};
+SDL_Rect systems_rect{940,467, 260,27};
+SDL_Rect Tside_panel{920,50, 300,380};
 SDL_Color bg{23,26,17};
 SDL_Color tx{241,201,8};
 //TODO: History Vector for strings and Rect
 
-std::string system_check_text("Air Circulation   Nominal\nWater Level       Nominal \nTemperature       Nominal\n");
+std::string system_check_text("Air Circulation   Normal\nWater Level       Normal \nTemperature       Normal\n");
 
 int main()
 {
@@ -56,17 +51,17 @@ int main()
     SDL_QueryTexture(font_texture, NULL, NULL, &staticW, &staticH);
     SDL_Rect font_rect{title_rect.x + 280, title_rect.y - 1, staticW, staticH}; 
     
-    SDL_Surface *systxt_surf = TTF_RenderText_Solid(font, "Systems Check", bg);
+    SDL_Surface *systxt_surf = TTF_RenderText_Solid(font, "Systems", bg);
     SDL_Texture *systxt_texture = SDL_CreateTextureFromSurface(renderer, systxt_surf);
     SDL_FreeSurface(systxt_surf);
     SDL_QueryTexture(systxt_texture, NULL, NULL, &staticW, &staticH);
-    SDL_Rect systxt_rect{systems_rect.x + 50, systems_rect.y - 1, staticW, staticH};
+    SDL_Rect systxt_rect{systems_rect.x + 90, systems_rect.y - 1, staticW, staticH};
 
     SDL_Surface *bottxt_surf = TTF_RenderText_Solid(font, "Type Command and Press ENTER", bg);
     SDL_Texture *bottxt_texture = SDL_CreateTextureFromSurface(renderer, bottxt_surf);
     SDL_FreeSurface(bottxt_surf);
     SDL_QueryTexture(bottxt_texture, NULL, NULL, &staticW, &staticH);
-    SDL_Rect bottxt_rect{bot_rect.x + 30, bot_rect.y - 1, staticW, staticH};
+    SDL_Rect bottxt_rect{bot_rect.x + 260, bot_rect.y - 1, staticW, staticH};
     
     SDL_Surface *syslist_surf = TTF_RenderText_Blended_Wrapped(font, system_check_text.c_str(), tx, 0);
     SDL_Texture *syslist_texture = SDL_CreateTextureFromSurface(renderer, syslist_surf);
@@ -158,6 +153,7 @@ int main()
         SDL_RenderClear(renderer);
         SDL_SetRenderDrawColor(renderer, 241, 201, 8, 255);
         SDL_RenderDrawRect(renderer, &side_panel);
+        SDL_RenderDrawRect(renderer, &Tside_panel);
         SDL_RenderFillRect(renderer, &systems_rect);
         SDL_RenderFillRect(renderer, &title_rect);
         SDL_RenderFillRect(renderer, &bot_rect);
