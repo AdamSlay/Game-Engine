@@ -1,5 +1,6 @@
 // Pip Boy style terminal
 
+#include <SDL2/SDL_render.h>
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
@@ -22,9 +23,11 @@ std::string title("Welcome to Typer v0.0.1");
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
 SDL_Event event;
-SDL_Rect title_rect{20,50, 900,27};
-SDL_Rect prompt_rect{20,promptY, promptW,promptH};
-SDL_Rect input_rect{50,promptY, inpW,inpH};
+SDL_Rect title_rect{50,50, 820,27};
+SDL_Rect prompt_rect{60,promptY, promptW,promptH};
+SDL_Rect input_rect{90,promptY, inpW,inpH};
+SDL_Rect side_panel{920,50, 300,700};
+SDL_Rect bot_rect{50,723, 820,27};
 SDL_Color bg{23,26,17};
 SDL_Color tx{241,201,8};
 //TODO: History Vector for strings and Rect
@@ -43,13 +46,12 @@ int main()
     SDL_Surface *font_surf = TTF_RenderText_Solid(font, title.c_str(), bg);
     SDL_Texture *font_texture = SDL_CreateTextureFromSurface(renderer, font_surf);
     SDL_FreeSurface(font_surf);
-
     SDL_QueryTexture(font_texture, NULL, NULL, &titleW, &titleH);
     SDL_Rect font_rect{title_rect.x + 10, title_rect.y - 1, titleW, titleH}; 
    
     while(running)
     {
-        // Setup User Input and Display to Screen
+        // Surfaces, Textures, Rects
         SDL_Surface *prompt_surf = TTF_RenderText_Blended_Wrapped(font, prompt.c_str(), tx, 0);
         SDL_Texture *prompt_texture = SDL_CreateTextureFromSurface(renderer, prompt_surf);
         SDL_QueryTexture(prompt_texture, NULL, NULL, &promptW, &promptH);
@@ -74,20 +76,11 @@ int main()
                 bs_allowed += 1;
                 
                 // Wrap Text after 80 chars
-                if (bs_allowed % 80 == 0 and bs_allowed > 1)
+                if (bs_allowed % 75 == 0 and bs_allowed > 1)
                 {  
-                    if (inp.substr(inp.size() - 1) == " ")
-                    {
-                        inp += "\n";
-                        new_lines += 1;
-                        bs_allowed += 2;
-                    }
-                    else
-                    {
-                        inp += "-\n";
-                        new_lines += 1;
-                        bs_allowed += 2;
-                    }
+                    inp.substr(inp.size() - 1) == " " ? inp+="\n": inp+="-\n";
+                    new_lines += 1;
+                    bs_allowed += 2;
                 }
             }
             // Escape, Backspace, Enter
@@ -105,7 +98,7 @@ int main()
                             bs_allowed -= 1;
                             // if backspace traverses over new_line,
                             // subtract one new line from the prompt queue
-                            if (bs_allowed % 80 == 0 and bs_allowed > 1)
+                            if (bs_allowed % 75 == 0 and bs_allowed > 1)
                             {
                                 new_lines -= 1;
                             }
@@ -139,6 +132,8 @@ int main()
         SDL_RenderClear(renderer);
         SDL_SetRenderDrawColor(renderer, 241, 201, 8, 255);
         SDL_RenderFillRect(renderer, &title_rect);
+        SDL_RenderDrawRect(renderer, &side_panel);
+        SDL_RenderFillRect(renderer, &bot_rect);
         SDL_RenderCopy(renderer, font_texture, NULL, &font_rect);
         SDL_RenderCopy(renderer, input_texture, NULL, &input_rect);
         SDL_RenderCopy(renderer, prompt_texture, NULL, &prompt_rect);
