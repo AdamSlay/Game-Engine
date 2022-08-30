@@ -17,6 +17,7 @@ int bs_allowed = 0;
 int new_lines = 0;
 std::string prompt("-> ");
 std::string inp(""); 
+std::string msg("Messages"); 
 std::string title("Welcome to Typer v0.0.1");
 SDL_Window *window = nullptr;
 SDL_Renderer *renderer = nullptr;
@@ -28,6 +29,7 @@ SDL_Rect input_rect{90,promptY, inpW,inpH};
 SDL_Rect side_panel{920,450, 300,300};
 SDL_Rect systems_rect{940,467, 260,27};
 SDL_Rect Tside_panel{920,50, 300,380};
+SDL_Rect msg_rect{940,67, 260,27};
 SDL_Color bg{23,26,17};
 SDL_Color tx{241,201,8};
 //TODO: History Vector for strings and Rect
@@ -50,7 +52,7 @@ int main()
     SDL_FreeSurface(font_surf);
     SDL_QueryTexture(font_texture, NULL, NULL, &staticW, &staticH);
     SDL_Rect font_rect{title_rect.x + 280, title_rect.y - 1, staticW, staticH}; 
-    
+
     SDL_Surface *systxt_surf = TTF_RenderText_Solid(font, "Systems", bg);
     SDL_Texture *systxt_texture = SDL_CreateTextureFromSurface(renderer, systxt_surf);
     SDL_FreeSurface(systxt_surf);
@@ -69,7 +71,12 @@ int main()
     SDL_QueryTexture(syslist_texture, NULL, NULL, &staticW, &staticH);
     SDL_Rect syslist_rect{side_panel.x + 25, side_panel.y + 60, staticW, staticH};
 
-
+    SDL_Surface *msg_surf = TTF_RenderText_Blended_Wrapped(font, msg.c_str(), bg, 0);
+    SDL_Texture *msg_texture = SDL_CreateTextureFromSurface(renderer, msg_surf);
+    SDL_FreeSurface(msg_surf);
+    SDL_QueryTexture(msg_texture, NULL, NULL, &staticW, &staticH);
+    SDL_Rect msg_txt_rect{msg_rect.x + 90, msg_rect.y - 1, staticW, staticH};
+    
     while(running)
     {
         // Surfaces, Textures, Rects
@@ -157,12 +164,14 @@ int main()
         SDL_RenderFillRect(renderer, &systems_rect);
         SDL_RenderFillRect(renderer, &title_rect);
         SDL_RenderFillRect(renderer, &bot_rect);
+        SDL_RenderFillRect(renderer, &msg_rect);
         SDL_RenderCopy(renderer, font_texture, NULL, &font_rect);
         SDL_RenderCopy(renderer, input_texture, NULL, &input_rect);
         SDL_RenderCopy(renderer, prompt_texture, NULL, &prompt_rect);
         SDL_RenderCopy(renderer, systxt_texture, NULL, &systxt_rect);
         SDL_RenderCopy(renderer, bottxt_texture, NULL, &bottxt_rect);
         SDL_RenderCopy(renderer, syslist_texture, NULL, &syslist_rect);
+        SDL_RenderCopy(renderer, msg_texture, NULL, &msg_txt_rect);
         SDL_RenderPresent(renderer);
         // Release Resources
         SDL_FreeSurface(input_surf);
@@ -174,6 +183,10 @@ int main()
     // Close All
     SDL_StopTextInput();
     SDL_DestroyTexture(font_texture);
+    SDL_DestroyTexture(syslist_texture);
+    SDL_DestroyTexture(systxt_texture);
+    SDL_DestroyTexture(bottxt_texture);
+    SDL_DestroyTexture(msg_texture);
     TTF_CloseFont(font);
     SDL_DestroyWindow(window);
     TTF_Quit();
