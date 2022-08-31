@@ -34,7 +34,7 @@ SDL_Color bg{23,26,17};
 SDL_Color tx{241,201,8};
 //TODO: History Vector for strings and Rect
 
-std::string system_check_text("Air Circulation   Normal\nWater Level       Normal \nTemperature       Normal\n");
+std::string system_check_text("");
 
 int main()
 {
