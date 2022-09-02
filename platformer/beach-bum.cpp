@@ -1,8 +1,12 @@
 // Simple Platformer using BeachBum as the char
 
+#include <SDL2/SDL_keyboard.h>
+#include <SDL2/SDL_keycode.h>
+#include <SDL2/SDL_render.h>
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
 
 bool init();
 void kill();
@@ -29,10 +33,16 @@ int main(int argc, char** args)
 // Game Loop
 bool loop()
 {
+    static const unsigned char* keys = SDL_GetKeyboardState(NULL);
     // Check Event
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {
+        if(event.type == SDL_QUIT)
+        {
+            return false;
+            break;
+        }
         if(event.type == SDL_KEYDOWN)
         {
             switch(event.key.keysym.sym)
@@ -46,8 +56,9 @@ bool loop()
     // Update Window
     SDL_SetRenderDrawColor(renderer, 23,26,17,255);
     SDL_RenderClear(renderer);
+    SDL_RenderCopyEx(renderer, texture, NULL,NULL,0,NULL,keys[SDL_SCANCODE_LEFT] ? SDL_FLIP_HORIZONTAL:SDL_FLIP_NONE);
     SDL_RenderPresent(renderer);
-    // Go again 
+    // loop again 
     return true;
 }
 
@@ -58,6 +69,14 @@ bool init()
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
     {
         std::cout << "Error initializing SDL:" << SDL_GetError() << std::endl;
+        system("pause");
+        return 1;
+    }
+   
+    // Init IMG with Error Check
+    if (IMG_Init(IMG_INIT_PNG) < 0)
+    {
+        std::cout << "Error initializing SDL_image:" << IMG_GetError() << std::endl;
         system("pause");
         return 1;
     }
@@ -79,7 +98,25 @@ bool init()
         std::cout << "Error creating renderer:" << SDL_GetError() << std::endl;
         return false;
     }
-   
+
+    // Load PNG to surface
+    SDL_Surface* buffer = IMG_Load("beach_bum_still.png");
+    if(!buffer)
+    {
+        std::cout << "Error loading image beach_bum_still.png" << IMG_GetError() << std::endl;
+        return false;
+    }
+  
+    // Create Texture from IMG surface
+    texture = SDL_CreateTextureFromSurface(renderer, buffer);
+    SDL_FreeSurface(buffer);
+    buffer = NULL;
+    if(!texture)
+    {
+        std::cout << "Error creating texture:" << SDL_GetError() << std::endl;
+        return false;
+    }
+
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
     return true;
 }
@@ -93,5 +130,7 @@ void kill()
     texture = NULL;
     renderer = NULL;
     window = NULL;
+    
+    IMG_Quit();
     SDL_Quit();
 }
