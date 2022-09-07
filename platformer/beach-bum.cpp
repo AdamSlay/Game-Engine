@@ -1,5 +1,8 @@
 // Simple Platformer using BeachBum as the char
 
+#include <SDL2/SDL_keycode.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_timer.h>
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -16,8 +19,11 @@ SDL_Renderer* renderer;
 SDL_Texture* texture;
 int playerX = 200;
 int playerY = 350;
-int jumptime = 0;
-int gravity = 5;
+int jumptime = 30;
+float jumpforce = .01;
+int deltaTime = 0;
+int gravity = 10;
+int speed = 10;
 // Main
 int main(int argc, char** args)
 {
@@ -62,6 +68,13 @@ bool loop()
                 case SDLK_d:
                     flip = false;
                     break;
+                case SDLK_SPACE:
+                    int i = jumptime;
+                    jumping = true;
+                    while (i--)
+                    {
+                        playerY--;
+                    }
             }
         }
         if(event.type == SDL_KEYUP)
@@ -69,7 +82,6 @@ bool loop()
             switch(event.key.keysym.sym)
             {
                 case SDLK_SPACE:
-                    jumptime = 0;
                     jumping = false;
                     break;
             }
@@ -79,22 +91,13 @@ bool loop()
     const Uint8 *keystate = SDL_GetKeyboardState(NULL);
     if (keystate[SDL_SCANCODE_A])
     {
-        playerX -= 5;
+        playerX -= speed;
     }
     if (keystate[SDL_SCANCODE_D])
     {
-        playerX += 5;
+        playerX += speed;
     }
-    if (keystate[SDL_SCANCODE_SPACE] && jumptime < 30)
-    {
-        playerY -= 7;
-        jumptime += 1;
-        jumping = true;
-    }
-    if (jumptime == 30)
-    {
-        jumping = false;
-    }
+
     // Update Window
     SDL_SetRenderDrawColor(renderer, 23,26,17,255);
     SDL_RenderClear(renderer);
@@ -142,7 +145,7 @@ bool init()
     }
     
     // Init Renderer with Error Check
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED); 
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC); 
     if (!renderer)
     {
         std::cout << "Error creating renderer:" << SDL_GetError() << std::endl;
